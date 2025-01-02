@@ -1,26 +1,34 @@
 semantic_model <- S7::new_class("semantic_model",
-  parent = workspace_contained
+  parent = workspace_contained,
+  properties = list(
+    name = S7::new_property(
+      S7::class_character
+    ),
+    id = S7::new_property(
+      S7::class_character,
+      getter = function(self) {
+        endpoint <- stringr::str_glue(
+          "workspaces/{workspace_id}/semanticModels",
+          workspace_id = self@workspace_id
+        )
+        resp <- invoke_fabric_api(
+          endpoint,
+          self@fabric_client,
+          "Fabric",
+          "GET",
+        ) |> httr2::resp_body_json()
+        id <- resp$value |>
+          as.data.frame() |>
+          dplyr::fitler(name == self@name) |>
+          dplyr::select(id)
+        return(id)
+      }
+    )
+  )
 )
 
-S7::method(get_id, semantic_model) <- function(self) {
-  endpoint <- stringr::str_glue(
-    "workspaces/{workspace_id}/semanticModels",
-    workspace_id = self@workspace_id
-  )
-  resp <- invoke_fabric_api(
-    endpoint,
-    self@fabric_client,
-    "Fabric",
-    "GET",
-  ) |> httr2::resp_body_json()
 
-  id <- resp
-  return(id)
-}
-
-
-
-S7::method(get_id, semantic_model) <- function(
+S7::method(refresh, semantic_model) <- function(
     self,
     refresh_type = "automatic",
     commit_mode = "transactional",
@@ -29,7 +37,7 @@ S7::method(get_id, semantic_model) <- function(
     "automatic",
     "calculate",
     "clearValues",
-    "dataonly",
+    "dataOnly",
     "defragment",
     "full"
   )
@@ -69,5 +77,6 @@ S7::method(get_id, semantic_model) <- function(
     "POST",
     req_body
   )
+  # TODO ping request until complete and return refresh status.
   return(refresh_resp)
 }
