@@ -7,6 +7,4 @@
 #' @param auth_token Input string. The bearer authentication token.
 #' @returns A valid GUID.
 #'
-get_id <- S7::new_generic("get_id", x, function(x, auth_token) {
-  S7::S7_dispatch()
-})
+get_id <- S7::new_generic("get_id", x)

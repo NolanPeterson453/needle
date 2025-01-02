@@ -3,7 +3,8 @@
 #' `invoke_fabric_api()` makes a call to the Microsoft Fabric or Power BI api.
 #'
 #' @param endpoint Input string. The endpoint to call.
-#' @param auth_token Input string. The bearer authentication token.
+#' @param fabric_client A Fabric Oauth client object
+#' of class httr2_oauth_client.
 #' @param api_version Input string. The verison of the api to use.
 #' Either "PowerBI" or "Fabric".
 #' @param method Input string. The rest method of the call.
@@ -15,7 +16,7 @@
 #' @export
 invoke_fabric_api <- function(
   endpoint,
-  auth_token,
+  fabric_client,
   api_version,
   method,
   body = NULL,
@@ -33,9 +34,7 @@ invoke_fabric_api <- function(
   url <- paste(base_url, endpoint) |> utils::URLencode()
 
   req <- httr2::request(url) |>
-    httr2::req_headers(
-      Authorization = stringr::str_glue("Bearer {auth_token}")
-    ) |>
+    httr2::oauth_client_req_auth(fabric_client) |>
     httr2::req_method(method)
   if (exists(body)) {
     req <- req |> httr2::req_body_json(body)
