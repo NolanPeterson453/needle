@@ -5,7 +5,7 @@
 #' @param endpoint Input string. The endpoint to call.
 #' @param fabric_client A Fabric Oauth client object
 #' of class httr2_oauth_client.
-#' @param api_version Input string. The verison of the api to use.
+#' @param api_version Input string. The version of the api to use.
 #' Either "PowerBI" or "Fabric".
 #' @param method Input string. The rest method of the call.
 #' Must be "GET", "POST", "PUT", "PATCH" or "DELETE"

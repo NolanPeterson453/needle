@@ -28,7 +28,7 @@ S7::method(create_fabric_item, report) <- function(
   description = ""
 ) {
   if (!(is.character(description))) {
-    rlang::abort("new_description must be of class character")
+    rlang::abort(print("new_description must be of class character"))
   }
   url <- stringr::str_glue(
     "{base_url}/reports",
@@ -132,13 +132,13 @@ S7::method(update_fabric_item, report) <- function(
   # Validate that new_report_name is correct type
   # if is null set to existing value
   if (!(is.null(new_report_name)) && !(is.character(new_report_name))) {
-    rlang::abort("new_report_name must be of class character")
+    rlang::abort(print("new_report_name must be of class character"))
   } else
     if (is.null(new_report_name)) {
       new_report_name <- x@item_name
     }
   if (!(is.character(new_description))) {
-    rlang::abort("new_description must be of class character")
+    rlang::abort(print("new_description must be of class character"))
   }
   url <- stringr::str_glue(
     "{base_url}/reports/{report_id}",
