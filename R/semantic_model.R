@@ -1,5 +1,5 @@
 semantic_model <- S7::new_class("semantic_model",
-  parent = workspace_contained,
+  parent = workspace_contained_item,
   properties = list(
     name = S7::new_property(
       S7::class_character
@@ -32,7 +32,8 @@ S7::method(refresh, semantic_model) <- function(
     self,
     refresh_type = "automatic",
     commit_mode = "transactional",
-    apply_refresh_policy = FALSE) {
+    apply_refresh_policy = FALSE,
+    verbose = FALSE) {
   refresh_types <- c(
     "automatic",
     "calculate",
@@ -60,6 +61,11 @@ S7::method(refresh, semantic_model) <- function(
       print("apply_refresh_policy must be a logical")
     )
   }
+  if (!(rlang::is_logical(verbose))) {
+    rlang::abort(
+      print("verbose must be a logical")
+    )
+  }
   req_body <- list(
     type <- refresh_type, # nolint
     commitMode <- commit_mode, # nolint
@@ -75,8 +81,37 @@ S7::method(refresh, semantic_model) <- function(
     self@fabric_client,
     "PowerBI",
     "POST",
-    req_body
+    req_body,
+    verbose = verbose
   )
-  # TODO ping request until complete and return refresh status.
-  return(refresh_resp)
+  refresh_id <- refresh_resp |>
+    httr2::resp_headers() |>
+    _$`x-ms-request-id`
+
+  status_endpoint <- stringr::str_glue(
+    "groups/{workspace_id}/datasets/{semantic_model_id}/refreshes/{refresh_id}",
+    workspace_id = self@workspace_id,
+    semantic_model_id = self@id,
+    refresh_id = refresh_id
+  )
+  refresh_status <- "Unknown"
+  while (refresh_status == "Unknown") {
+    refresh_status <- invoke_fabric_api(
+      status_endpoint,
+      self@fabric_client,
+      "PowerBI",
+      "GET",
+      verbose = verbose
+    ) |>
+      httr2::resp_body_json() |>
+      _$status
+  }
+  message(
+    stringr::str_glue(
+      "Refresh id: {refresh_id}. Refresh status: {refresh_status}",
+      refresh_id,
+      refresh_status
+    )
+  )
+  return(NULL)
 }

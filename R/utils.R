@@ -13,3 +13,4 @@ is_guid <- function(input_string) {
   )
   return(stringr::str_detect(input_string, guid_regex))
 }
+
